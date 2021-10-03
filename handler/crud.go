@@ -23,7 +23,8 @@ type Lights struct {
 
 func (db *DB) getLights(w http.ResponseWriter, r *http.Request) {
 	var lights Lights
-	err := db.collection.Find(lights)
+	c := db.session.DB("light").C("lights")
+	err := c.Find(lights)
 	if err != nil {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(err.Error()))
@@ -40,7 +41,8 @@ func (db *DB) createLight(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(postBody, &lights)
 	// Create an Hash ID to insert
 	lights.ID = bson.NewObjectId()
-	err := db.collection.Insert(lights)
+	c := db.session.DB("light").C("lights")
+	err := c.Insert(lights)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 	} else {
@@ -56,7 +58,8 @@ func (db *DB) updateLight(w http.ResponseWriter, r *http.Request) {
 	putBody, _ := ioutil.ReadAll(r.Body)
 	json.Unmarshal(putBody, &lights)
 	// Create an Hash ID to insert
-	err := db.collection.Update(bson.M{"_id": bson.ObjectIdHex(vars["id"])}, bson.M{"$set": &lights})
+	c := db.session.DB("light").C("lights")
+	err := c.Update(bson.M{"_id": bson.ObjectIdHex(vars["id"])}, bson.M{"$set": &lights})
 	if err != nil {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(err.Error()))
@@ -68,7 +71,8 @@ func (db *DB) updateLight(w http.ResponseWriter, r *http.Request) {
 
 func (db *DB) deleteLight(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	err := db.collection.Remove(bson.M{"_id": bson.ObjectIdHex(vars["id"])})
+	c := db.session.DB("light").C("lights")
+	err := c.Remove(bson.M{"_id": bson.ObjectIdHex(vars["id"])})
 	if err != nil {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(err.Error()))
