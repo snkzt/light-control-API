@@ -21,12 +21,14 @@ type Lights struct {
 	Status bool          `json:"status" bson:"status"`
 }
 
-func (db *DB) getLights(w http.ResponseWriter, r *http.Request) {
+var err error
+
+func (db *DB) GetLights(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 	var lights Lights
 	c := db.session.DB("light").C("lights")
-	err := c.Find(lights)
+	err := db.collection.Find(&lights)
 	if err != nil {
-		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(err.Error()))
 	} else {
 		w.Header().Set("Content-Type", "application/json")
@@ -35,7 +37,7 @@ func (db *DB) getLights(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (db *DB) createLight(w http.ResponseWriter, r *http.Request) {
+func (db *DB) CreateLight(w http.ResponseWriter, r *http.Request) {
 	var lights Lights
 	postBody, _ := ioutil.ReadAll(r.Body)
 	json.Unmarshal(postBody, &lights)
@@ -52,7 +54,7 @@ func (db *DB) createLight(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (db *DB) updateLight(w http.ResponseWriter, r *http.Request) {
+func (db *DB) UpdateLight(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var lights Lights
 	putBody, _ := ioutil.ReadAll(r.Body)
@@ -69,7 +71,7 @@ func (db *DB) updateLight(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (db *DB) deleteLight(w http.ResponseWriter, r *http.Request) {
+func (db *DB) DeleteLight(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	c := db.session.DB("light").C("lights")
 	err := c.Remove(bson.M{"_id": bson.ObjectIdHex(vars["id"])})
